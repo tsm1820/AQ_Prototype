@@ -15,7 +15,7 @@ Adaptive Quiz app version 0.1
 ----
 0. Install dependencies on your system with console prompt `pip install -r requirements.txt`
 1. Go to model_usercontrol.py and create user via SystemAdminClass.registration (example provided)
-2. Start the server_frontend.py from console prompt, e.g. python server_frontend.py 1
+2. Start the server_frontend.py from console prompt, e.g. python server_frontend.py 0 (debugging mode) python server_frontend.py 1 (production mode)
 3. Go to webpage (simple case is to go to http://localhost)
 4. Login with created credential from step 1
 
