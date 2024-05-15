@@ -4,7 +4,7 @@ Adaptive Quiz app version 0.1
 - Prototype version
 - Standalone from KU Recommender
 - Minor Changes for Input Handling and UI (still in-progress)
-    - Quiz number limit
+    - Quiz number limit (Currently adding condition statement to limit the number*)
     - More refining data labels and overview visualisation
     - Provide another database and feature spare for future updates
 - Requirement Modification for UAT1a
