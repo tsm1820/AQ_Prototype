@@ -21,7 +21,7 @@ Adaptive Quiz app version 0.1
 
 ## Operation Scenarios
 ----
-1. After completed *Operation Procedure* it will lead you to Pre-test session
+1. After completed *Operation Procedure* it will lead you to Baseline Quiz
 2. Complete the Pre-test session, webpage will redirect you to homepage (Must complete, otherwise you will not be able to go to main application)
 3. There will be 3 pages:
     - Overview, a page to See your profile, mastery status, performance score
