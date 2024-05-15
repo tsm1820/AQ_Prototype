@@ -137,5 +137,6 @@ Example Usage: SystemAdminClass.registration("username", "password", "Full name"
 
 if __name__ == "__main__":
     SystemAdminClass.registration("user_1", "12345", "TAN TAN")
+    SystemAdminClass.registration("user_test", "12345", "Test")
 
     pass
