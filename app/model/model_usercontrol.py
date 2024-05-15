@@ -131,7 +131,15 @@ class UserAuthentication():
 
 """
 New user will be registered only from backend side, not having frontend section.
-Example Usage: SystemAdminClass.registration("username", "password", "Full name")
+Example Usage: 
+
+Add this python code:
+SystemAdminClass.registration("username", "password", "Full name")
+
+v
+
+Run
+
 """
 
 if __name__ == "__main__":
