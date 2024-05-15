@@ -1,0 +1,26 @@
+.divpad
+{
+    padding: 0.25%;
+}
+
+#top-row
+{
+    padding-top:1%;
+    padding-left:1%;
+    padding-right:2%;
+}
+
+#menu-row
+{
+    padding-top:1%;
+    padding-left:1%;
+    padding-right:1%;
+}
+
+.tab-content
+{
+    padding-top:2%;
+    padding-left:2%;
+    padding-right:2%;
+    overflow:auto;
+}

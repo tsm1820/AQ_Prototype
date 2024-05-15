@@ -1,0 +1,184 @@
+<!-- Extended from the header-->
+{% extends "header_template.html" %}
+<!-- CSS Script -->
+{% block css_script_1 %}
+<link href="{{url_for('static', filename='css/jquery.dataTables.min.css')}}" rel="stylesheet">
+{% endblock %}
+{% block css_script_2 %}
+<link href="{{url_for('static', filename='dashboard.css')}}" rel="stylesheet">
+{% endblock %}
+<!-- JS Script-->
+{% block js_script_1 %}
+<script src="{{url_for('static', filename='js/jquery.dataTables.min.js')}}"></script>
+{% endblock %}
+{% block js_script_2 %}
+<script src="{{url_for('static', filename='js/chart.js')}}"></script>
+{% endblock %}
+{% block js_script_3 %}
+{% if session_start == true %}
+<script src="{{url_for('static', filename='pretest.js')}}"></script>
+{% endif %}
+{% endblock %}
+<!-- Body -->
+{% block body_app %}
+<div class="row" id="top-row">
+    <div class="row">
+        <div class="col text-start">
+            <h1><b>Pre-Test Session</b></h1>
+        </div>
+        <div class="col text-end">
+            <span id="abort_point">
+                
+            </span>
+            <button class="btn btn-dark disabled"><svg fill="currentColor"><use xlink:href="#steps"/></svg>My learning path</button>
+        </div>
+        <div class="col input-group mb-3">
+            <span class="input-group-text"><svg><use xlink:href="#search"/></svg></span>
+            <input type="text" class="form-control" placeholder="Search" readonly disabled>
+        </div>
+    </div>
+    <div class="row">
+        
+    </div>
+</div>
+<div class="tab-content" id="quiz_page">
+    <hr/>
+    <div class="row" id="quiz_alert_point">
+        
+    </div>
+    <div class="row" style="height:75%">
+        <div style="width:10vw;">
+            <div class="col text-center">
+                <br/>
+                <br/>
+                <button class="btn disabled"><svg fill="currentColor"><use xlink:href="#stopwatch"/></svg><b><span id="span_timer">0:00</span></b> mins</button>
+            </div>
+        </div>
+        <div class="col">
+            <div class="row">
+                <b class="text-center">Answer history:</b> 
+                <b class="text-end">Total question answered: <span id="progress_span"></span></b>
+                <div class="container-fluid text-center" id="answer_history">
+                    
+                </div>
+            </div>
+            <div class="row" style="padding:1%">
+                <br/>
+            </div>
+            <div class="row " style="color:gray;">
+                <b>
+                <div class="col text-center">
+                    <h4>Question <span id="question_number"></span></h4>
+                </div>
+                </b>
+            </div>
+            <div class="row " style="color:dimgray;">
+                <b>
+                    <div class="col text-center" id="question_text">
+                    </div>
+                </b>
+            </div>
+            <div class="row" style="padding:1%">
+                <br/>
+            </div>
+            <div class="row" style="color:dimgray;">
+                <label>
+                    <table class="table border table-hover" style="table-layout: fixed;">
+                            <td style="width:3%"><input name="answer_choice" type="radio" id="check_1" checkbox-role="choice_selector"></td>
+                            <td class="text-start">
+                                <div><b>Option A</b></div>
+                                <div class="text-start" style="word-wrap: break-word; white-space: normal !important;" id="answer_text_1">123</div>
+                            </td>
+                    </table>
+                </label>
+            </div>
+            <div class="row" style="padding:0.5%">
+            </div>
+            <div class="row" style="color:dimgray;">
+                <label>
+                    <table class="table border table-hover" style="table-layout: fixed;">
+                            <td style="width:3%"><input name="answer_choice" type="radio" id="check_2" checkbox-role="choice_selector"></td>
+                            <td class="text-start">
+                                <div><b>Option B</b></div>
+                                <div class="text-start" style="word-wrap: break-word; white-space: normal !important;" id="answer_text_2">123</div>
+                            </td>
+                    </table>
+                </label>
+            </div>
+            <div class="row" style="padding:0.5%">
+            </div>
+            <div class="row" style="color:dimgray;">
+                <label>
+                    <table class="table border table-hover" style="table-layout: fixed;">
+                            <td style="width:3%"><input name="answer_choice" type="radio" id="check_3" checkbox-role="choice_selector"></td>
+                            <td class="text-start">
+                                <div><b>Option C</b></div>
+                                <div class="text-start" style="word-wrap: break-word; white-space: normal !important;" id="answer_text_3">123</div>
+                            </td>
+                    </table>
+                </label>
+            </div>
+            <div class="row" style="padding:0.5%">
+            </div>
+            <div class="row" style="color:dimgray;">
+                <label>
+                    <table class="table border table-hover" style="table-layout: fixed;">
+                            <td style="width:3%"><input name="answer_choice" type="radio" id="check_4" checkbox-role="choice_selector"></td>
+                            <td class="text-start">
+                                <div><b>Option D</b></div>
+                                <div class="text-start" style="word-wrap: break-word; white-space: normal !important;" id="answer_text_4">123</div>
+                            </td>
+                    </table>
+                </label>
+            </div>
+            <div class="row" style="padding:1.0%">
+            </div>
+            <div class="fade" id="explanation_card">
+                <div class="row">
+                    <div class="col text-start">
+                        Result: <h3 id="result_text"></h3>
+                    </div>
+                    <div class="col text-end">
+                        <button class="btn btn-info disabled" id="show_exp_btn" type="button" data-bs-toggle="collapse" data-bs-target="#explanation_box" aria-expanded="false" aria-controls="explanation_box">Show explanation</button>
+                    </div>
+                </div>
+                <div class="row" style="padding-top:1%">
+                    <div class="col text-center">
+                        <div class="collapse" id="explanation_box">
+                            <div class="card card-body">
+                                <table class="table table-borderless" style="table-layout: fixed;">
+                                    <tr>
+                                        <th class="text-start"><h4>Explanation:</h4></th>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-start" style="word-wrap: break-word; white-space: normal !important; " id="explanation_text">
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="width:10%">
+            <div class="row">
+                <div class="col text-center">
+                    <br/>
+                    <br/>
+                    <button class="btn btn-dark" id="submit_btn">Submit</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col text-center">
+                    <br/>
+                    <br/>
+                    <button class="btn btn-info disabled" id="next_question">Next</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
