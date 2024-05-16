@@ -120,3 +120,9 @@ CREATE TABLE user_query(
     n_attempt INTEGER NOT NULL,
     log_timestamp INTEGER NOT NULL
 );
+
+-- textboxdata.db
+CREATE TABLE textboxdata(
+    id INTEGER PRIMARY KEY,
+    description_data TEXT
+);

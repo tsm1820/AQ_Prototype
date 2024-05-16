@@ -15,9 +15,6 @@
 <script src="{{url_for('static', filename='js/chart.js')}}"></script>
 {% endblock %}
 {% block js_script_3 %}
-<script src="{{url_for('static', filename='js/chartjs-plugin-datalabels.js')}}"></script>
-{% endblock %}
-{% block js_script_4 %}
 {% if session_start == true %}
 <script src="{{url_for('static', filename='dashboard.js')}}"></script>
 {% endif %}
@@ -75,10 +72,7 @@
                     <div class="row">
                         <div class="col text-center card">
                             <div class="divpad"></div>
-                            <h3 class="text-start">
-                                <span class="input-group-text">
-                                <svg><use xlink:href="#person-badge"/></svg><b>Profile info</b>
-                            </span></h3>
+                            <h3 class="text-start">Profile info</h3>
                             <a href="#" id="show_upload"><img id="profile_img" height="250" class="rounded-circle" title="Click to upload new photo"/></a>
                             <div class="divpad"></div>
                             <div class="d-none" id="upload_photo_box">
@@ -108,61 +102,57 @@
                     </div>
                 </div>
                 <div class="col card">
-                    <div class="divpad"></div>
-                    <h3 class="text-start">
-                        <span class="input-group-text">
-                        <svg><use xlink:href="#book"/></svg><b>Cell (Mastery) Status</b>
-                    </span></h3>
+                    <h3 class="text-start">Cell (Mastery) Status</h3>
                     <table class="table table-sm table-bordered table-dark text-center">
                         <tr>
-                            <td useFor="mastery" cellId="1">1</td>
-                            <td useFor="mastery" cellId="2">2</td>
-                            <td useFor="mastery" cellId="3">3</td>
+                            <td useFor="mastery">1</td>
+                            <td useFor="mastery">2</td>
+                            <td useFor="mastery">3</td>
                         </tr>
                         <tr>
-                            <td useFor="mastery" cellId="4">4</td>
-                            <td useFor="mastery" cellId="5">5</td>
-                            <td useFor="mastery" cellId="6">6</td>
+                            <td useFor="mastery">4</td>
+                            <td useFor="mastery">5</td>
+                            <td useFor="mastery">6</td>
                         </tr>
                         <tr>
-                            <td useFor="mastery" cellId="7">7</td>
-                            <td useFor="mastery" cellId="8">8</td>
-                            <td useFor="mastery" cellId="9">9</td>
+                            <td useFor="mastery">7</td>
+                            <td useFor="mastery">8</td>
+                            <td useFor="mastery">9</td>
                         </tr>
                         <tr>
-                            <td useFor="mastery" cellId="10">10</td>
-                            <td useFor="mastery" cellId="11">11</td>
-                            <td useFor="mastery" cellId="12">12</td>
+                            <td useFor="mastery">10</td>
+                            <td useFor="mastery">11</td>
+                            <td useFor="mastery">12</td>
                         </tr>
                         <tr>
-                            <td useFor="mastery" cellId="13">13</td>
-                            <td useFor="mastery" cellId="14">14</td>
-                            <td useFor="mastery" cellId="15">15</td>
+                            <td useFor="mastery">13</td>
+                            <td useFor="mastery">14</td>
+                            <td useFor="mastery">15</td>
                         </tr>
                         <tr>
-                            <td useFor="mastery" cellId="16">16</td>
-                            <td useFor="mastery" cellId="17">17</td>
-                            <td useFor="mastery" cellId="18">18</td>
+                            <td useFor="mastery">16</td>
+                            <td useFor="mastery">17</td>
+                            <td useFor="mastery">18</td>
                         </tr>
                         <tr>
-                            <td useFor="mastery" cellId="19">19</td>
-                            <td useFor="mastery" cellId="20">20</td>
-                            <td useFor="mastery" cellId="21">21</td>
+                            <td useFor="mastery">19</td>
+                            <td useFor="mastery">20</td>
+                            <td useFor="mastery">21</td>
                         </tr>
                         <tr>
-                            <td useFor="mastery" cellId="22">22</td>
-                            <td useFor="mastery" cellId="23">23</td>
-                            <td useFor="mastery" cellId="24">24</td>
+                            <td useFor="mastery">22</td>
+                            <td useFor="mastery">23</td>
+                            <td useFor="mastery">24</td>
                         </tr>
                         <tr>
-                            <td useFor="mastery" cellId="25">25</td>
-                            <td useFor="mastery" cellId="26">26</td>
-                            <td useFor="mastery" cellId="27">27</td>
+                            <td useFor="mastery">25</td>
+                            <td useFor="mastery">26</td>
+                            <td useFor="mastery">27</td>
                         </tr>
                         <tr>
-                            <td useFor="mastery" cellId="28">28</td>
-                            <td useFor="mastery" cellId="29">29</td>
-                            <td useFor="mastery" cellId="30">30</td>
+                            <td useFor="mastery">28</td>
+                            <td useFor="mastery">29</td>
+                            <td useFor="mastery">30</td>
                         </tr>
                     </table>
                 </div>
@@ -171,12 +161,8 @@
             <div class="row" style="overflow:auto;">
                 <div class="col card">
                     <div class="p-2 g-col-6" style="background-color:#FFFFFF;">
-                        <h3 class="text-start">
-                            <span class="input-group-text">
-                            <button class="btn btn-light btn-sm" id="view_switch_btn"><svg><use xlink:href="#arrow-repeat"/></svg><b id="view_switch_title">Performance History</b></button>
-                        </span></h3>
+                        <h3 class="text-start">Performance score</h3>
                         <canvas id="learner_ability_chart" width="70vw" height="13vh"></canvas>
-                        <canvas class="d-none" id="learner_score_chart" width="70vw" height="13vh"></canvas>
                     </div>
                     <div id="ability_chart_status"></div>
                 </div>
@@ -185,13 +171,10 @@
         <div class="tab-pane fade d-none" id="tab-pane-2" role="tabpanel" aria-labelledby="report-tab" tabindex="1">
             <div class="row"> 
                 <div class="col card"> <!-- info-->
-                    <div class="divpad"></div>
-                        <h3 class="text-start"></h3>
-                        <h3 class="text-start">
-                            <span class="input-group-text">
-                            <svg><use xlink:href="#graph-up-arrow"/></svg><b>Progress report: <i id="attempt_report"></i></b>
-                        </span></h3>
-                    <canvas id="attempt_chart" width="50vw" height="20vh"></canvas>
+                    <div class="p-2 g-col-6" style="background-color:#FFFFFF;">
+                        <h3 class="text-start">Progress report: <i id="attempt_report"></i></h3>
+                        <canvas id="attempt_chart" width="50vw" height="20vh"></canvas>
+                    </div>
                     <div id="attempt_chart_status"></div>
                 </div>
                 <div class="col">
@@ -219,13 +202,6 @@
                             
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col text-center">
-                            <textarea class="form-control" id="text_box_tbd" disabled readonly></textarea>
-                        </div>
-                        
-                    </div>
-                    <div class="divpad"></div>
                     <div class="row">
                         <div class="col text-center">
                             <button class="btn btn-dark" id="retake_quiz_btn">Reattempt adaptive quiz  <svg fill="currentColor"><use xlink:href="#arrow-right"/></svg></button>
@@ -347,7 +323,7 @@
                         <div class="col text-start">
                             <strong>Number of Questions <svg><use xlink:href="#question-circle"/></svg></strong>
                             <br/>
-                            Customise the number of question items for your quiz (Number of questions per unit testing).    
+                            Customise the number of question items for your quiz.    
                         </div>
                         <div class="col">
                             <div class="input-group mb-3">
@@ -355,26 +331,6 @@
                                 <select class="form-select" id="quiz_num">
                                     {% for i in range(3,(15 + 1)) %}
                                         <option value="{{i}}" {% if (quiz_number == i) %}selected{% endif %}>{{i}}</option>
-                                    {% endfor %}
-                                </select>
-                                <span class="input-group-text">question(s)</span>
-                            </div>
-                        </div>
-                        <div class="divpad"></div>
-                        <hr/>
-                    </div>
-                    <div class="row">
-                        <div class="col text-start">
-                            <strong>Maximum number of questions limit <svg><use xlink:href="#question-circle"/></svg></strong>
-                            <br/>
-                            A total number of questions limit in quiz session
-                        </div>
-                        <div class="col">
-                            <div class="input-group mb-3">
-                                <span class="input-group-text"><svg><use xlink:href="#hash"/></svg></span>
-                                <select class="form-select" id="max_limit">
-                                    {% for i in range(10,(30 + 10),10) %}
-                                    <option value="{{i}}" {% if (max_limit == i) %}selected{% endif %}>{{i}}</option>
                                     {% endfor %}
                                 </select>
                                 <span class="input-group-text">question(s)</span>
