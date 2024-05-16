@@ -30,6 +30,19 @@ class GeneralDataQuery():
             disclaimer_string = fp.read()
 
         return disclaimer_string
+    
+    @staticmethod
+    def get_textboxdata():
+        db_obj = DB_Object("TEXTBOXAREA_DB")
+        sql_command = "select description_data from textboxdata where id=(select MAX(id) from textboxdata)"
+        result = db_obj.perform_sql(sql_command, True)
+
+        if (result != []):
+            result = result[0][0]
+        else:
+            result = ""
+
+        return result
 
 class UserDataQuery():
     @staticmethod
@@ -40,6 +53,8 @@ class UserDataQuery():
 
         db_obj.perform_sql(sql_command)
         db_obj.commit_update()
+        
+    
 
     @staticmethod
     def get_report_data(user_id):
@@ -213,6 +228,26 @@ class UserDataQuery():
         return ret_val
     
     @staticmethod
+    def get_user_scores(user_id):
+        db_obj = DB_Object("USER_ACTIVITY_LOG_DB")
+        sql_command = "SELECT SUM(answer_correct) , COUNT(answer_correct), (SUM(answer_correct) * 100 / COUNT(answer_correct)),n_attempt "
+        sql_command += " FROM activity_log WHERE user_id = " + str(user_id) +" GROUP BY n_attempt ORDER BY n_attempt"
+        
+        get_info = db_obj.perform_sql(sql_command, True)
+        user_ans_number_list = []
+        user_quiz_number_list = []
+        user_score_percentage_list = []
+        user_timestamp = []
+
+        for i in range(0, len(get_info)):
+            user_ans_number_list.append(get_info[i][0])
+            user_quiz_number_list.append(get_info[i][1])
+            user_score_percentage_list.append(get_info[i][2])
+            user_timestamp.append(get_info[i][3])
+        
+        return user_ans_number_list, user_quiz_number_list, user_score_percentage_list, user_timestamp
+    
+    @staticmethod
     def get_user_abilities(user_id):
         db_obj = DB_Object("ADQ_DB")
         sql_command = "select timestamp, current_ability from learner_ability where user_id=" + str(user_id) + " order by n_attempt asc"
@@ -243,5 +278,5 @@ class UserDataQuery():
         return mastery_list
 
 if __name__ == "__main__":
-    print(UserDataQuery.get_report_data(1))
+    print(UserDataQuery.get_user_scores(3))
     pass

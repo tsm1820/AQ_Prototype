@@ -3,7 +3,7 @@ File: server_frontend.py
 
 This file is Server front running for Report Webpage application.
 """
-import ctypes, sys, json
+import ctypes, sys
 from app import app
 from app.globalclass import osbasic as OSBASIC
 from flask import session

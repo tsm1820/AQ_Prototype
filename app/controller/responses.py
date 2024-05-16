@@ -34,6 +34,7 @@ def fn_login():
                 session['m_duration'] = 10
                 session['num_quiz'] = 3
                 session['num_cell'] = 3
+                session['max_limit_quiz'] = 10
                 session['check_cell'] = []
 
                 if (data['remember'] == True):
@@ -62,12 +63,13 @@ def fn_req_save_settings():
             if login_status.get_login_status() == True:
                 ####################################################### Function start here
                 data_json = request.get_json()
-                allow_processing, num_cell, num_quiz, check_cell, m_duration = sub_stq_check_data(data_json)
+                allow_processing, num_cell, num_quiz, check_cell, m_duration, max_limit_quiz = sub_stq_check_data(data_json)
                 if (allow_processing):
                     session['m_duration'] = m_duration
                     session['num_quiz'] = num_quiz
                     session['num_cell'] = num_cell
                     session['check_cell'] = check_cell
+                    session['max_limit_quiz'] = max_limit_quiz
                     response = {"result":"success"}
                 else:
                     response = {"result":"fail", "status": "Data input is invalid/incomplete"}
@@ -102,6 +104,9 @@ def fn_req_userinfo(): # Function goes two ways, either staying on dashboard or 
                     # ability
                     learner_ability, user_timestamp = model_dbquery.UserDataQuery.get_user_abilities(session['user_id'])
                     ability_list = {"Timestamp": user_timestamp, "Data Point": learner_ability}
+                    # score
+                    user_ans_number_list, user_quiz_number_list, user_score, n_attempt = model_dbquery.UserDataQuery.get_user_scores(session['user_id'])
+                    score_list = {"Timestamp": user_timestamp, "Data Point": user_score, "Extrainfo": [user_ans_number_list, user_quiz_number_list]}
                     # mastery
                     mastery_list = model_dbquery.UserDataQuery.get_user_mastery(session['user_id'])
                     response = {"result":"success", 
@@ -114,7 +119,8 @@ def fn_req_userinfo(): # Function goes two ways, either staying on dashboard or 
                                 "next_attempt": session['n_attempt'],
                                 "pretest_done": pretest_status,
                                 "learner_ability": ability_list,
-                                "mastery_list": mastery_list}
+                                "mastery_list": mastery_list,
+                                "score_list": score_list}
                 else:
                     session['quiz_start'] = False
                     try:
@@ -150,6 +156,9 @@ def fn_req_fetch_report(): # Function goes two ways, either staying on dashboard
                 # ability
                 session['n_attempt'] = model_dbquery.UserDataQuery.get_latest_attempt(session['user_id']) + 1
                 if (session['n_attempt'] > 1):
+                    # For future using
+                    textbox_data = model_dbquery.GeneralDataQuery.get_textboxdata()
+
                     learner_ability, user_timestamp = model_dbquery.UserDataQuery.get_user_abilities(session['user_id'])
                     showing_ability = []
                     if (len(learner_ability) > 0):
@@ -196,7 +205,8 @@ def fn_req_fetch_report(): # Function goes two ways, either staying on dashboard
                             "learner_ability": chart_data,
                             "n_attempt":session['n_attempt'],
                             "quiz_streak": response_list,
-                            "your_answer": choice_list}
+                            "your_answer": choice_list,
+                            "textboxdata": textbox_data}
 
             else:
                 session.clear() # Force logout
@@ -429,16 +439,17 @@ def fn_fetch_question():
                     data = G_MEMORY[session['user_id']]['sqe']
                     if ((data['question_data'] == None) or # Case initiating from session creation
                         (len(data['append_select_quiz']) <= len(data['append_response_list']))):  # Case there is already data in G_MEMORY, do nothing
-                        data = sub_mapping_fetch_quiz(data)
+                        data = sub_mapping_fetch_quiz(data, session['max_limit_quiz'])
                         G_MEMORY[session['user_id']]['sqe'] = data # Save back to temp memory
                         # Response will be returned either same question or new question.
                         
                     else:
                         # some error encounter, extreme condition like timeout
                         if (data['timeout'] == True):
-                            data = sub_mapping_fetch_quiz(data)
+                            data = sub_mapping_fetch_quiz(data, session['max_limit_quiz'])
 
                         # Otherwise, do nothing
+                    total_quiz = ((data['num_cell'] * data['num_quiz']) if session['max_limit_quiz'] > (data['num_cell'] * data['num_quiz']) else session['max_limit_quiz'])
                     response = {"result" : "success", \
                                     "question_no":len(data['append_select_quiz']), \
                                     "question":data['question_data'][0], \
@@ -450,7 +461,7 @@ def fn_fetch_question():
                                     "current_ts": int(time.time()),
                                     "m_duration": G_MEMORY[session['user_id']]['quiz_engine_input']['duration'],
                                     "quiz_streak":data['append_response_list'],
-                                    "total_quiz":(data['num_cell'] * data['num_quiz'])}
+                                    "total_quiz":total_quiz}
                         
                     # Overriding the data for special condition
                     if (data['session_complete'] == True):
@@ -637,10 +648,17 @@ def sub_stq_check_data(data):
     except:
         timer = -1
         pass
+    
+    try:
+        max_limit_quiz = int(data['max_quiz'])
+    except:
+        max_limit_quiz = 0
+        pass
 
     if (((data_l == 0) and (num_cell == 0)) or
         (timer == -1) or
-        (num_quiz == 0)):
+        (num_quiz == 0) or
+        (max_limit_quiz == 0)):
         ret_val = False
     else:
         if (data_l > 0):
@@ -649,7 +667,7 @@ def sub_stq_check_data(data):
             check_cell = []
         ret_val = True
 
-    return ret_val, num_cell, num_quiz, check_cell, timer
+    return ret_val, num_cell, num_quiz, check_cell, timer, max_limit_quiz
 
 def sub_create_dts(num_cell, num_quiz, user_cell):
     # Create data structure
@@ -713,7 +731,7 @@ def sub_mapping_activate_quiz(in_sqe, user_id, prev_learner_ab): # sqe = session
 
     return sqe
 
-def sub_mapping_fetch_quiz(in_sqe): #sqe = session_quiz_engine
+def sub_mapping_fetch_quiz(in_sqe, max_quiz_limit): #sqe = session_quiz_engine
     sqe = in_sqe
 
     if (sqe['no_quiz'] == False):
@@ -773,7 +791,7 @@ def sub_mapping_fetch_quiz(in_sqe): #sqe = session_quiz_engine
                 else:
                     break
     
-    if ((sqe['timeout'] == True) or 
+    if (((sqe['timeout'] == True) or ((len(sqe['append_response_list']) == max_quiz_limit))) or
         ((len(sqe['append_select_cell']) == sqe['num_cell']) and
          ((sqe['remain_quiz_cell'] == 0) or (sqe['trigger'] == 1)))):
         sqe['session_complete'] = True

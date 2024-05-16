@@ -32,12 +32,14 @@ def display_homepage():
         session_start = True
         timer_select = session['m_duration']
         quiz_number = session['num_quiz']
+        max_limit = session['max_limit_quiz']
     else:
         session_start = False
         timer_select = 10
         quiz_number = 3
+        max_limit = 10
 
-    ret_val = render_template('dashboard.html', session_start=session_start, timer_select=timer_select, quiz_number=quiz_number)
+    ret_val = render_template('dashboard.html', session_start=session_start, timer_select=timer_select, quiz_number=quiz_number, max_limit=max_limit)
     
     return ret_val
 
