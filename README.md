@@ -35,15 +35,17 @@ Adaptive Quiz app version 0.1
 6. From Setting page:
     - `Timer` is to configure in each quiz session time limit (-- No timer -- means timer will never expire), time runs out will force attempt to the completion
     - `Number of Questions` is to configure a number of questions in each module
+    - `Maximum number of questions limit` is to configure the amount of questions that can be found for user in each attempt
     - `Configuration` is to select module(s) or to let system randomly choose for you
     - Setting page will save the settings until user logs out
 7. Once the quiz is started:
-    - There will be timer (if one configures it)
+    - There will be timer (if one configures it), and if timer has run out, application will automatically to conclude the session
     - `Abort the attempt` button will be shown (to abort the session), and the attempt will not be taken into account
     - First question will be automatically fetch
     - `Submit` button will be used to submit your answer, once submitted, it will be disabled until new question is fetched
     - `Next` button will be used to fetch next question, and to end the session if final question is submitted on answer
     - `Next` button will not be able to click until user submitted answer
+    - `I don't know` button will act same as `Submit` but without needing to select any choice on given question
 8. For every question answered:
     - There will be an explanation and result show after answer submitted, even if it is correct or incorrect
     - `Show explanation` will be used to hide/show the explanation to question
