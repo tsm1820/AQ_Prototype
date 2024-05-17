@@ -105,7 +105,7 @@ $(document).ready(function()
         }
         else
         {
-            alertCreation("#quiz_alert_point","danger", "Select on one of the choices to submit answer.", true);
+            alertCreation("#quiz_alert_point","danger", "Select on one of the options to submit answer.", true);
         }
         
     });
@@ -113,7 +113,7 @@ $(document).ready(function()
     /* Quiz - IDK button */
     $("#idk_btn").click(function()
     {
-        if (confirm("Are you sure, don't you to try to guess?") == true)
+        if (confirm("Are you sure? Click 'yes' if you do not want to guess?") == true)
         {
             submitAnswer(0);
         }
@@ -488,19 +488,19 @@ function interpretPerformance(ability_value)
     var ceiling_value = parseInt(Math.ceil(ability_value));
     if (ceiling_value <= -2)
     {
-        data = "Novice"
+        data = "Beginner"
     }
     else if (ceiling_value == -1)
     {
-        data = "Beginner"
+        data = "Novice"
     }
     else if (ceiling_value == 0)
     {
-        data = "Learner"
+        data = "Competent"
     }
     else if (ceiling_value == 1)
     {
-        data = "Knowledgeable"
+        data = "Skilled"
     }
     else if (ceiling_value == 2)
     {
