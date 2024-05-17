@@ -109,10 +109,20 @@ $(document).ready(function()
         }
         
     });
+
+    /* Quiz - IDK button */
+    $("#idk_btn").click(function()
+    {
+        if (confirm("Are you sure, don't you to try to guess?") == true)
+        {
+            submitAnswer(0);
+        }
+        
+    });
 });
 
 /* Overview and main functionality */
-function getUserInfo()
+function getUserInfo(afterReport=false)
 {
     thisAjax();
 
@@ -135,62 +145,118 @@ function getUserInfo()
                         }
                         else
                         {
-                            // Show page
-                            $("#non-session").removeClass("d-none");
-                            // Overview page
-                            $("#my_name").val(response.full_name);
-                            $("#my_learner_id").val(response.user_id);
-                            $("#disclaimer_text").text(response.disclaimer);
-                            $("#attempt_disclaimer").text("Attempt "+String(response.next_attempt));
-                            $("#attempt_point").text("Attempt "+String(response.next_attempt));
-                            $("#attempt_point").addClass("d-none");
-    
-                            if (response.photo_string != "")
+                            if (afterReport == false)
                             {
-                                $("#profile_img").attr("src", response.photo_string);
-                                $("#profile_img").attr("alt", "Embedded Image")
-                            }
-                            else
-                            {
-                                $("#profile_img").attr("src", "/static/images/profile_default.png")
-                            }
-                            
-                            // Highlight mastery
-                            $('td[useFor="mastery"]').each(function(){
-                                this_cell_data = response.mastery_list[parseInt($(this).text()) - 1]
-                                if (this_cell_data == true)
+                                // Show page
+                                $("#non-session").removeClass("d-none");
+                                // Overview page
+                                $("#my_name").val(response.full_name);
+                                $("#my_learner_id").val(response.user_id);
+                                $("#disclaimer_text").text(response.disclaimer);
+                                $("#attempt_disclaimer").text("Attempt "+String(response.next_attempt));
+                                $("#attempt_point").text("Attempt "+String(response.next_attempt));
+                                $("#attempt_point").addClass("d-none");
+
+                                if (response.photo_string != "")
                                 {
-                                    $(this).addClass("table-success");
+                                    $("#profile_img").attr("src", response.photo_string);
+                                    $("#profile_img").attr("alt", "Embedded Image")
                                 }
                                 else
                                 {
-                                    $(this).addClass("table-danger");
+                                    $("#profile_img").attr("src", "/static/images/profile_default.png")
                                 }
-                            });
 
-                            presentChart("learner_ability_chart", "ability_chart_status",response.learner_ability)
-
-                            fetchReport();
-                            // Settings page
-                            if (response.settings[1].length > 0)
-                            {
-                                // Unrandom
-                                $("#random_check").prop("checked", false);
-                                $("#random_box").addClass("d-none");
-                                $("#select_box").removeClass("d-none");
-                                
-                                // Only for start page
-                                if (total_cell.length == 0)
-                                {
-                                    for (i=0; i<response.settings[1].length; i++)
+                                // Highlight mastery
+                                $('td[useFor="mastery"]').each(function(){
+                                    this_cell_data = response.mastery_list[parseInt($(this).attr("cellId")) - 1]
+                                    if (this_cell_data == true)
                                     {
-                                        addCell(true, response.settings[1][i]);
+                                        $(this).removeClass("table-danger");
+                                        $(this).removeClass("table-success");
+                                        $(this).addClass("table-success");
                                     }
+                                    else
+                                    {
+                                        $(this).removeClass("table-danger");
+                                        $(this).removeClass("table-success");
+                                        $(this).addClass("table-danger");
+                                    }
+                                });
+
+                                presentChart("learner_ability_chart", "ability_chart_status",response.learner_ability,"", [], interpretPerformance, "", []);
+                                var map_data_array = [];
+                                for (i = 0 ; i < response.score_list["Data Point"].length; i++)
+                                {
+                                    map_data_array.push(String(response.score_list.Extrainfo[0][i]) + "/" + String(response.score_list.Extrainfo[1][i]))
+                                }
+                                presentChart("learner_score_chart", "ability_chart_status",response.score_list, "", [], null, "", map_data_array);
+
+                                // Make switchable
+                                $("#view_switch_btn").on('click', function() {
+                                    if ($("#view_switch_title").text().toLowerCase() == "Performance history".toLowerCase())
+                                    {
+                                        $("#view_switch_title").text("Score History");
+                                        $("#learner_score_chart").removeClass("d-none");
+                                        $("#learner_ability_chart").addClass("d-none");
+                                    }
+                                    else
+                                    {
+                                        $("#view_switch_title").text("Performance History");
+                                        $("#learner_ability_chart").removeClass("d-none");
+                                        $("#learner_score_chart").addClass("d-none");
+                                    }
+                                });
+
+                                fetchReport();
+                                // Settings page
+                                if (response.settings[1].length > 0)
+                                {
+                                    // Unrandom
+                                    $("#random_check").prop("checked", false);
+                                    $("#random_box").addClass("d-none");
+                                    $("#select_box").removeClass("d-none");
+                                    
+                                    // Only for start page
+                                    if (total_cell.length == 0)
+                                    {
+                                        for (i=0; i<response.settings[1].length; i++)
+                                        {
+                                            addCell(true, response.settings[1][i]);
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    $("#cell_num").val(response.settings[0]);
                                 }
                             }
                             else
                             {
-                                $("#cell_num").val(response.settings[0]);
+                                // Highlight mastery
+                                $('td[useFor="mastery"]').each(function(){
+                                    this_cell_data = response.mastery_list[parseInt($(this).attr("cellId")) - 1]
+                                    if (this_cell_data == true)
+                                    {
+                                        $(this).removeClass("table-danger");
+                                        $(this).removeClass("table-success");
+                                        $(this).addClass("table-success");
+                                    }
+                                    else
+                                    {
+                                        $(this).removeClass("table-danger");
+                                        $(this).removeClass("table-success");
+                                        $(this).addClass("table-danger");
+                                    }
+                                });
+
+                                presentChart("learner_ability_chart", "ability_chart_status",response.learner_ability,"", [], interpretPerformance, "", []);
+                                var map_data_array = [];
+                                for (i = 0 ; i < response.score_list["Data Point"].length; i++)
+                                {
+                                    map_data_array.push(String(response.score_list.Extrainfo[0][i]) + "/" + String(response.score_list.Extrainfo[1][i]))
+                                }
+                                presentChart("learner_score_chart", "ability_chart_status",response.score_list, "", [], null, "", map_data_array);
                             }
                         }
                     }
@@ -266,10 +332,17 @@ function getProfilePhoto()
     }
 }
 
-function presentChart(object_id, chart_status_id, dataset)
+function presentChart(object_id, 
+                      chart_status_id, 
+                      dataset, 
+                      title, 
+                      label_name_array=[],
+                      bar_top_function=null,
+                      legend_name="",
+                      map_data=[])
 {
     var labels = []
-    var learner_ability_array = []
+    var data_array = []
 
     // Instantiate the chart
     var is_chart_existed = Chart.getChart($("#"+object_id))
@@ -281,51 +354,164 @@ function presentChart(object_id, chart_status_id, dataset)
 
     if (dataset.hasOwnProperty("Data Point") == true)
     {
-        // Help reduce canvas drawing time and smoother transition
-        for(let i=0; i<dataset["Data Point"].length; i++)
+        if (dataset["Data Point"].length > 0)
         {
-            labels.push(convertEpochToFormat(dataset.Timestamp[i]))
-            learner_ability_array.push(dataset["Data Point"][i])
-        }
-        
-        // Create an array of datasets
-        const datasets = [
+            // Help reduce canvas drawing time and smoother transition
+            for(let i=0; i<dataset["Data Point"].length; i++)
             {
-                label: 'Score',
-                data: learner_ability_array,
-                borderColor: 'rgb(201, 203, 207)',
-                backgroundColor: 'rgba(201, 203, 207, 0.2)',
-                borderWidth: 1
-            },
-        ];
+                if ((label_name_array.length > 0) && 
+                    (label_name_array.length == dataset["Data Point"].length))
+                {
+                    labels.push(label_name_array[i])
+                }
+                else
+                {
+                    labels.push(convertEpochToFormat(dataset.Timestamp[i]))
+                }
+                
+                data_array.push(dataset["Data Point"][i])
+            }
+    
+            if (legend_name != "")
+            {
+                configure_legend_name = legend_name
+                legend_enable = true;
+            }
+            else
+            {
+                configure_legend_name = "Value";
+                legend_enable = false;
+            }
 
-        // Define the chart configuration options
-        const chart_config = {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: datasets
-            },
-            options: {
-                title: {
-                display: true,
-                text: 'Performance activity'
+            if (bar_top_function == null && map_data.length == 0)
+            {
+                padding_top_val = 0;
+            }
+            else
+            {
+                padding_top_val = 40;
+            }
+
+            // Create an array of datasets
+            const datasets = [
+                {
+                    label: configure_legend_name,
+                    data: data_array,
+                    borderColor: 'rgb(251, 133, 0)',
+                    backgroundColor: 'rgba(251, 133, 0, 0.9)',
+                    borderWidth: 1
                 },
-                scales: {
+            ];
+    
+            // Define the chart configuration options
+            const chart_config = {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: title,
+                            color: 'Black',
+                            font: {
+                                weight: 'bold',
+                                size: 20
+                            }
+                        },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'end',
+                            color: 'black',
+                            font: {
+                                size: 15
+                            },
+                            rotation: -45,
+                            formatter: function (value, context) {
+                                if (bar_top_function != null)
+                                {
+                                    data = bar_top_function(value);
+                                }
+                                else
+                                {
+                                    //alert(map_data.length)
+                                    if (map_data.length > 0)
+                                    {
+                                        data = map_data[context.dataIndex]
+                                    }
+                                    else
+                                    {
+                                        data = "";
+                                    }
+                                }
+                                return data;
+                            }
+                    
+                        },
+                        legend: {
+                            display: legend_enable
+                         },
+                    },
+                    scales: {
                     y: {
                         beginAtZero: true
+                    },
+                    },
+                    layout: {
+                        padding:
+                        {
+                            top: padding_top_val
+                        }
                     }
                 }
             }
-        };
-        $("#" + chart_status_id).html("");
-
-        const chart = new Chart($("#"+object_id), chart_config);
+            $("#" + chart_status_id).html("");
+            Chart.register(ChartDataLabels);
+            const chart = new Chart($("#"+object_id), chart_config);
+        }
+        else
+        {
+            $("#" + chart_status_id).html("<h4 class=\"text-center\">System cannot find any data in system currently</h4>");
+        }
+        
     }
     else
     {
-        $("#" + chart_status_id).html("<h1 class=\"text-center\">System cannot find any performance score in system currently</h1>");
+        $("#" + chart_status_id).html("<h4 class=\"text-center\">System cannot find any data in system currently</h4>");
     }
+}
+
+function interpretPerformance(ability_value)
+{
+    var ceiling_value = parseInt(Math.ceil(ability_value));
+    if (ceiling_value <= -2)
+    {
+        data = "Novice"
+    }
+    else if (ceiling_value == -1)
+    {
+        data = "Beginner"
+    }
+    else if (ceiling_value == 0)
+    {
+        data = "Learner"
+    }
+    else if (ceiling_value == 1)
+    {
+        data = "Knowledgeable"
+    }
+    else if (ceiling_value == 2)
+    {
+        data = "Proficient"
+    }
+    else
+    {
+        data = "Expert"
+    }
+    
+    return data;
 }
 
 /* Setting section */
@@ -362,6 +548,7 @@ function saveSettings()
     var num_quiz = 0; 
     var num_cell = 0;
     var num_timer = 0;
+    var max_limit_quiz = 0;
     var random = $("#random_check").is(":checked");
     var cell_array = [];
     
@@ -381,7 +568,7 @@ function saveSettings()
     
     num_quiz = $("#quiz_num").val();
     num_timer = $("#timer_choice").val();
-
+    max_limit_quiz = $("#max_limit").val();
     if (num_cell == 0)
     {
         if (random)
@@ -396,10 +583,10 @@ function saveSettings()
     }
     else
     {
-        thisAjax(num_quiz, num_cell, cell_array, num_timer);
+        thisAjax(num_quiz, num_cell, cell_array, num_timer, max_limit_quiz);
     }
     
-    function thisAjax(num_quiz, num_cell, check_quiz, num_timer)
+    function thisAjax(num_quiz, num_cell, check_quiz, num_timer, max_limit_quiz)
     {
         $.ajax({
         type: "POST",
@@ -407,7 +594,8 @@ function saveSettings()
         data: JSON.stringify({ "num_quiz": num_quiz,
                                 "check_quiz" : check_quiz,
                                 "num_cell": num_cell,
-                                "timer": num_timer }),
+                                "timer": num_timer,
+                                "max_quiz": max_limit_quiz }),
         contentType: "application/json; charset=utf-8",
         dataType: "json",
         success: function(response) 
@@ -457,12 +645,21 @@ function fetchReport(switch_page=false)
                         
                         sorted = response.cell_index.sort(function(a, b) {return a-b});
                         $("#selected_cell").val(sorted.join(", "));
-                        presentChart("attempt_chart", "attempt_chart_status",response.learner_ability);
+                        if (response.learner_ability["Data Point"].length <= 1)
+                        {
+                            data_label = ["Current"]
+                        }
+                        else
+                        {
+                            data_label = ["Previous", "Current"]
+                        }
+                        presentChart("attempt_chart", "attempt_chart_status",response.learner_ability, "", data_label, interpretPerformance, "Ability Level");
                         createAnswerHistory(response.quiz_streak, "report_attempt_answer");
                         $("#attempt_report").text("Attempt " + (response.n_attempt - 1));
                         $("#attempt_report_ans").text("Attempt " + (response.n_attempt - 1));
                         $("#attempt_disclaimer").text("Attempt "+String(response.n_attempt));
                         $("#attempt_point").text("Attempt "+String(response.n_attempt));
+                        $("#text_box_tbd").text(response.textboxdata);
                         
                         if (switch_page)
                         {
@@ -486,6 +683,7 @@ function fetchReport(switch_page=false)
                             $("#tab-2").removeClass("disabled");
                             $("#tab-2").click();
                             loading();
+                            getUserInfo(true);
                         }
                         else
                         {
@@ -612,11 +810,17 @@ function startQuiz()
 function startTimer(timestamp_start, current_ts, m_duration)
 {
     timestamp_stop = timestamp_start + (m_duration * 60);
-    timerInterval = setInterval(updateTimer, 1000);
+    timerInterval = setInterval(dummyTimer, 1000);
     last_ts_server = current_ts;
 }
 
-function updateTimer()
+function dummyTimer()
+{
+    // Only set interval has this permission
+    updateTimer(true);
+}
+
+function updateTimer(timeout=false)
 {
     var remaining_seconds = timestamp_stop - last_ts_server;
     var seconds = 0;
@@ -643,6 +847,11 @@ function updateTimer()
         clearInterval(timerInterval);
         timerInterval = false;
         $("#span_timer").text("0:00");
+        if (timeout == true)
+        {
+            fetchQuestion(true);
+        }
+        
     }
     else
     {
@@ -654,7 +863,6 @@ function abortAttempt()
 {
     loading(true);
     thisAjax();
-    getUserInfo();
 
     function thisAjax()
     {
@@ -682,6 +890,7 @@ function abortAttempt()
                         $("#answer_text_4").text("");
                         $("#non-session").removeClass("d-none");
                         $("#tab-1").click();
+                        getUserInfo(true);
                         loading();
                     }
                     else
@@ -710,7 +919,7 @@ function abortButton()
     });
 }
 
-function fetchQuestion()
+function fetchQuestion(fetch_time_out=false)
 {
     loading(true);
     $("#check_").prop("checked", false);
@@ -720,14 +929,17 @@ function fetchQuestion()
 
     $("#non-session").addClass("d-none");
     $("#attempt_point").removeClass("d-none");
-    thisAjax();
+    thisAjax(fetch_time_out);
     abortButton();
 
-    function thisAjax()
+    function thisAjax(fetch_time_out)
     {
         $.ajax({
             type: "POST",
             url: "/req_fetch_question",
+            data: JSON.stringify({ "timeout": fetch_time_out}),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
             success: function(response) 
                 {
                     if (response.result == "success")
@@ -739,21 +951,18 @@ function fetchQuestion()
                                 alertCreation("#quiz_alert_point","success", "You are already gotten all knowledges, aborting attempt.", true);
                                 loading(true);
                                 fetchReport(true);
-                                // abortAttempt();
                             }
                             else if (response.reason == "complete")
                             {
                                 alertCreation("#quiz_alert_point","info", "Quiz completed, showing result.", true);
                                 loading(true);
                                 fetchReport(true);
-                                //abortAttempt();
                             }
                             else if (response.reason == "timeout")
                             {
                                 alertCreation("#quiz_alert_point","info", "Timer is expired, showing result.", true);
                                 loading(true);
                                 fetchReport(true);
-                                //abortAttempt();
                             }
                             else
                             {
@@ -773,7 +982,7 @@ function fetchQuestion()
                             $("#explanation_card").addClass("fade");
                             $("#explanation_text").text("");
                             $("#submit_btn").removeClass("disabled");
-                            $('#next_question').off('click', fetchQuestion);
+                            $('#next_question').off('click', dummyBind);
                             $('#next_question').addClass("disabled");
                             createAnswerHistory(response.quiz_streak, "answer_history");
                             $("#progress_span").text(String(response.quiz_streak.length) + "/" + String(response.total_quiz))
@@ -797,6 +1006,11 @@ function fetchQuestion()
                 }
             });
     }
+}
+
+function dummyBind()
+{
+    fetchQuestion();
 }
 
 function submitAnswer(answer_choice)
@@ -827,12 +1041,17 @@ function submitAnswer(answer_choice)
                             $("#result_text").text("Incorrect");
                             $("#result_text").css("color", "red");
                         }
+                        else if (response.learner_feedback == "idk")
+                        {
+                            $("#result_text").text("-");
+                            $("#result_text").css("color", "grey");
+                        }
 
                         $("#explanation_card").removeClass("fade");
                         $("#explanation_text").text(response.explanation);
                         $("#submit_btn").addClass("disabled");
                         $('#next_question').removeClass("disabled");
-                        $('#next_question').on('click', fetchQuestion);
+                        $('#next_question').on('click',dummyBind);
                         $("#show_exp_btn").removeClass("disabled");
                         $("#show_exp_btn").addClass("collapsed");
                         $("#show_exp_btn").attr("aria-expanded", false);
@@ -874,6 +1093,11 @@ function createAnswerHistory(array, append_place)
             if (array[i] == 1)
             {
                 append_string += "<div class=\"col bg-success border\" useFor=\"reportonly\" style=\"color:white\">"
+                append_string += String(i+1) + "</div>"
+            }
+            else if (array[i] == -1)
+            {
+                append_string += "<div class=\"col bg-secondary border\" useFor=\"reportonly\" style=\"color:white\">"
                 append_string += String(i+1) + "</div>"
             }
             else

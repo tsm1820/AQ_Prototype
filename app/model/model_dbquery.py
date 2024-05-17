@@ -57,18 +57,24 @@ class UserDataQuery():
     
 
     @staticmethod
-    def get_report_data(user_id):
+    def get_report_data(user_id, attempt_no):
         db_obj = DB_Object("USER_ACTIVITY_LOG_DB")
-        sql_command = "select quiz_id, answer_correct, quiz_answer, timestamp from activity_log where n_attempt=(select MAX(n_attempt) from activity_log where user_id="+str(user_id)
-        sql_command += ") and user_id=" + str(user_id)
+        sql_command = "select quiz_id, answer_correct, quiz_answer, timestamp from activity_log where n_attempt=" +str(attempt_no) + " "
+        sql_command += " and user_id=" + str(user_id)
 
         get_info = db_obj.perform_sql(sql_command, True)
         item = list(zip(*get_info))
 
-        selected_quiz = item[0]
-        response_list = item[1]
-        choice_list = item[2]
-        timestamp = item[3]
+        if (item != []):
+            selected_quiz = item[0]
+            response_list = item[1]
+            choice_list = item[2]
+            timestamp = item[3]
+        else:
+            selected_quiz = []
+            response_list = []
+            choice_list = []
+            timestamp = []
         
         return [selected_quiz, response_list, choice_list, timestamp]
 
@@ -81,6 +87,13 @@ class UserDataQuery():
         db_obj.perform_sql(sql_command)
         db_obj.commit_update()
 
+    @staticmethod
+    def delete_residual_user_activity(user_id, n_attempt):
+        db_obj = DB_Object("USER_ACTIVITY_LOG_DB")
+        sql_command = "delete from activity_log where user_id = "+ str(user_id)+ " and n_attempt = " + str(n_attempt)
+
+        db_obj.perform_sql(sql_command)
+        db_obj.commit_update()
 
     @staticmethod
     def update_user_attempt(user_id, prev_ability_cell, current_ability_cell, mastery_list):

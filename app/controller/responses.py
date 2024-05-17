@@ -162,22 +162,35 @@ def fn_req_fetch_report(): # Function goes two ways, either staying on dashboard
                     learner_ability, user_timestamp = model_dbquery.UserDataQuery.get_user_abilities(session['user_id'])
                     showing_ability = []
                     if (len(learner_ability) > 0):
-                        selected_quiz, response_list, choice_list, timestamp = model_dbquery.UserDataQuery.get_report_data(session['user_id'])
-                        cell_index = []
-                        for i in range(0, len(selected_quiz)):
-                            cell_index.append(model_mapping.GenQuizPool.get_cell_index(selected_quiz[i]))
-                        cell_index = set(cell_index) # remove duplication
-                        cell_index = list(zip(*cell_index))
-                        cell_index = cell_index[0]
-                        if (len(learner_ability) > 1):
-                            showing_ability = [learner_ability[-2], learner_ability[-1]]
-                            showing_timestamp = [user_timestamp[-2], user_timestamp[-1]]
+                        selected_quiz, response_list, choice_list, timestamp = model_dbquery.UserDataQuery.get_report_data(session['user_id'], (session['n_attempt'] - 1))
+                        if (selected_quiz != []):
+                            cell_index = []
+                            for i in range(0, len(selected_quiz)):
+                                cell_index.append(model_mapping.GenQuizPool.get_cell_index(selected_quiz[i]))
+                            cell_index = set(cell_index) # remove duplication
+                            cell_index = list(zip(*cell_index))
+                            cell_index = cell_index[0]
+                            if (len(learner_ability) > 1):
+                                showing_ability = [learner_ability[-2], learner_ability[-1]]
+                                showing_timestamp = [user_timestamp[-2], user_timestamp[-1]]
+                            else:
+                                showing_ability = [learner_ability[-1]]
+                                showing_timestamp = [user_timestamp[-1]]
+                            total_second_used = max(timestamp) - min(timestamp)
+                            total_quiz = len(selected_quiz)
+                            total_correct_ans = sum(response_list)
                         else:
-                            showing_ability = [learner_ability[-1]]
-                            showing_timestamp = [user_timestamp[-1]]
-                        total_second_used = max(timestamp) - min(timestamp)
-                        total_quiz = len(selected_quiz)
-                        total_correct_ans = sum(response_list)
+                            total_second_used = 0
+                            total_quiz = 0
+                            total_correct_ans = 0
+                            cell_index = []
+                            if (len(learner_ability) > 1):
+                                showing_ability = [learner_ability[-2], learner_ability[-1]]
+                                showing_timestamp = [user_timestamp[-2], user_timestamp[-1]]
+                            else:
+                                showing_ability = [learner_ability[-1]]
+                                showing_timestamp = [user_timestamp[-1]]
+                            response_list = []
                     else:
                         total_second_used = 0
                         total_quiz = 0
@@ -195,6 +208,13 @@ def fn_req_fetch_report(): # Function goes two ways, either staying on dashboard
                     showing_timestamp = []
                     response_list = []
 
+                quiz_streak = []
+                for i in range(0, len(response_list)):
+                    if (choice_list[i] == 0):
+                        quiz_streak.append(-1) 
+                    else:
+                        quiz_streak.append(response_list[i])
+
                 chart_data = {"Data Point": showing_ability, "Timestamp": showing_timestamp}
 
                 response = {"result":"success", 
@@ -204,7 +224,7 @@ def fn_req_fetch_report(): # Function goes two ways, either staying on dashboard
                             "cell_index": cell_index,
                             "learner_ability": chart_data,
                             "n_attempt":session['n_attempt'],
-                            "quiz_streak": response_list,
+                            "quiz_streak": quiz_streak,
                             "your_answer": choice_list,
                             "textboxdata": textbox_data}
 
@@ -226,13 +246,19 @@ def fn_req_get_explanation_history():
             login_status = model_usercontrol.UserAuthentication(login_state=1, session_id=session['session_id'], user_id=session['user_id'])
             if login_status.get_login_status() == True:
 
-                selected_quiz, response_list, choice_list, timestamp = model_dbquery.UserDataQuery.get_report_data(session['user_id'])
+                selected_quiz, response_list, choice_list, timestamp = model_dbquery.UserDataQuery.get_report_data(session['user_id'], session['n_attempt'] - 1)
                 data = request.get_json()
                 quiz_index = int(data['answer_id']) - 1
                 question_data = model_mapping.GenQuizPool.get_question_data(selected_quiz[quiz_index])
                 explanation_data = model_mapping.GenQuizPool.get_explanation_data(selected_quiz[quiz_index])
 
-                response = {"result":"success", "question_text": question_data[0], "answer_text": question_data[choice_list[quiz_index]], "explanation_text": explanation_data}
+                # I don't know case
+                if (choice_list[quiz_index] == 0):
+                    answer_text = "I don't know"
+                else:
+                    answer_text = question_data[choice_list[quiz_index]]
+
+                response = {"result":"success", "question_text": question_data[0], "answer_text": answer_text, "explanation_text": explanation_data}
 
             else:
                 session.clear() # Force logout
@@ -380,6 +406,7 @@ def fn_start_quiz():
             if login_status.get_login_status() == True:
                 ####################################################### Function start here
                 if (G_MEMORY.get(session['user_id']) is None):
+                    model_dbquery.UserDataQuery.delete_residual_user_activity(session['user_id'], session['n_attempt'])
                     data = sub_create_dts(session['num_cell'], session['num_quiz'], session['check_cell'])
                     prev_learner_ab = model_dbquery.UserDataQuery.get_previous_ability(session['user_id'])
                     data = sub_mapping_activate_quiz(data, session['user_id'],prev_learner_ab)
@@ -412,6 +439,8 @@ def fn_abort_attempt():
         if ((session.get('user_id') is not None)):
             login_status = model_usercontrol.UserAuthentication(login_state=1, session_id=session['session_id'], user_id=session['user_id'])
             if login_status.get_login_status() == True:
+                # Delete any attempt that was in completed
+                model_dbquery.UserDataQuery.delete_residual_user_activity(session['user_id'], session['n_attempt'])
                 try:
                     del(G_MEMORY[session['user_id']])
                 except KeyError:
@@ -436,17 +465,19 @@ def fn_fetch_question():
             login_status = model_usercontrol.UserAuthentication(login_state=1, session_id=session['session_id'], user_id=session['user_id'])
             if login_status.get_login_status() == True:
                 if (G_MEMORY.get(session['user_id']) is not None):
+                    json_data = request.get_json()
+                    client_timeout = json_data['timeout']
                     data = G_MEMORY[session['user_id']]['sqe']
                     if ((data['question_data'] == None) or # Case initiating from session creation
                         (len(data['append_select_quiz']) <= len(data['append_response_list']))):  # Case there is already data in G_MEMORY, do nothing
-                        data = sub_mapping_fetch_quiz(data, session['max_limit_quiz'])
+                        data = sub_mapping_fetch_quiz(data, session['max_limit_quiz'], client_timeout)
                         G_MEMORY[session['user_id']]['sqe'] = data # Save back to temp memory
                         # Response will be returned either same question or new question.
                         
                     else:
                         # some error encounter, extreme condition like timeout
-                        if (data['timeout'] == True):
-                            data = sub_mapping_fetch_quiz(data, session['max_limit_quiz'])
+                        if ((data['timeout'] == True) or (client_timeout == True)):
+                            data = sub_mapping_fetch_quiz(data, session['max_limit_quiz'], client_timeout)
 
                         # Otherwise, do nothing
                     total_quiz = ((data['num_cell'] * data['num_quiz']) if session['max_limit_quiz'] > (data['num_cell'] * data['num_quiz']) else session['max_limit_quiz'])
@@ -462,6 +493,8 @@ def fn_fetch_question():
                                     "m_duration": G_MEMORY[session['user_id']]['quiz_engine_input']['duration'],
                                     "quiz_streak":data['append_response_list'],
                                     "total_quiz":total_quiz}
+                    
+                    print(data['session_complete'], data['timeout'])
                         
                     # Overriding the data for special condition
                     if (data['session_complete'] == True):
@@ -504,9 +537,15 @@ def fn_submit_answer():
                     time_data = G_MEMORY[session['user_id']]['quiz_engine_input']
                     # Response will be returned either same question or new question.
                     if (data['question_data'] != None):
-                        user_correct_ans = model_mapping.GenQuizPool.get_learner_response(data['append_select_quiz'][-1],request.json['selected_choice'])
-                        
-                        data = sub_mapping_answer(data, user_correct_ans, time_data,request.json['selected_choice']) # To include
+
+                        if (request.json['selected_choice'] == 0):
+                            idk = True
+                            user_correct_ans = 0
+                        else:
+                            idk = False
+                            user_correct_ans = model_mapping.GenQuizPool.get_learner_response(data['append_select_quiz'][-1],request.json['selected_choice'])
+
+                        data = sub_mapping_answer(data, user_correct_ans, time_data, request.json['selected_choice']) # To include
                         
                         G_MEMORY[session['user_id']]['sqe'] = data # Save back to temp memory
                         explanation = model_mapping.GenQuizPool().get_explanation_data(data['append_select_quiz'][-1])
@@ -515,7 +554,10 @@ def fn_submit_answer():
                         if (user_correct_ans == 1):
                             response['learner_feedback'] = "pass"
                         else:
-                            response['learner_feedback'] = "fail"
+                            if (idk == False):
+                                response['learner_feedback'] = "fail"
+                            else:
+                                response['learner_feedback'] = "idk"
                     else:
                         # In case that question data unable to fetch due to learner already got all knowledges
                         response = {"result" : "success", "question":""}
@@ -731,7 +773,7 @@ def sub_mapping_activate_quiz(in_sqe, user_id, prev_learner_ab): # sqe = session
 
     return sqe
 
-def sub_mapping_fetch_quiz(in_sqe, max_quiz_limit): #sqe = session_quiz_engine
+def sub_mapping_fetch_quiz(in_sqe, max_quiz_limit, timeout_case): #sqe = session_quiz_engine
     sqe = in_sqe
 
     if (sqe['no_quiz'] == False):
@@ -791,10 +833,15 @@ def sub_mapping_fetch_quiz(in_sqe, max_quiz_limit): #sqe = session_quiz_engine
                 else:
                     break
     
-    if (((sqe['timeout'] == True) or ((len(sqe['append_response_list']) == max_quiz_limit))) or
+    if (((sqe['timeout'] == True) or 
+         ((len(sqe['append_response_list']) == max_quiz_limit)) or
+         (timeout_case == True)) or
         ((len(sqe['append_select_cell']) == sqe['num_cell']) and
          ((sqe['remain_quiz_cell'] == 0) or (sqe['trigger'] == 1)))):
         sqe['session_complete'] = True
+
+        if (timeout_case == True):
+            sqe['timeout'] = True
         
 
     return sqe
@@ -826,7 +873,10 @@ def sub_mapping_answer(in_sqe, input_response, quiz_engine_input, answer_choice)
                                                                         sqe['dsc_quiz'],
                                                                         sqe['dfc_quiz'],
                                                                         sqe['cell_available_questions'])
-            sqe['append_response_list'].append(input_response)
+            if (answer_choice == 0):
+                sqe['append_response_list'].append(-1)
+            else:
+                sqe['append_response_list'].append(input_response)
             sqe['remain_quiz_cell'] -= 1
 
         if (sqe['remain_quiz_cell'] <= 0):
