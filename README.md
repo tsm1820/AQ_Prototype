@@ -9,8 +9,17 @@ Adaptive Quiz app version 0.1
     - Some UI/UX amendments (Progress/Answer History Bar and Other visualisations)
     - LLM Embedding
     - Online Database Integration 
-- KLI-based UCB Implementing, not yet tested
+- KLI-based UCB Implementing
 - Adjusting Quiz Pool for UAT1a
+
+## Created User
+Current User
+username: Test_User
+password: 12345
+
+New User
+username: user_000
+password: 12345
 
 ## Operation Procedure
 ----

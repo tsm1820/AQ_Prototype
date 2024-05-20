@@ -143,7 +143,7 @@ Run
 """
 
 if __name__ == "__main__":
-    SystemAdminClass.registration("user_1", "12345", "Test Test")
-    SystemAdminClass.registration("user_test", "1234", "Test User")
+    SystemAdminClass.registration("user_000", "12345", "Test Learner")
+    
 
     pass
