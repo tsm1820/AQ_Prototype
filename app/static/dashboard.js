@@ -27,6 +27,24 @@ $(document).ready(function()
         $("#tab-3").click();
     });
 
+    $("#tab-1").click(function() {
+        $("#welcome_text").removeClass("d-none");
+        $("#adt_text").addClass("d-none");
+
+    });
+    $("#tab-2").click(function() {
+        $("#welcome_text").addClass("d-none");
+        $("#adt_text").removeClass("d-none");
+    });
+    $("#tab-3").click(function() {
+        $("#welcome_text").addClass("d-none");
+        $("#adt_text").removeClass("d-none");
+    });
+    $("#tab-4").click(function() {
+        $("#welcome_text").addClass("d-none");
+        $("#adt_text").removeClass("d-none");
+    });
+    
     $("#start_quiz_btn").click(function()
     {
         startQuiz();
@@ -150,7 +168,10 @@ function getUserInfo(afterReport=false)
                                 // Show page
                                 $("#non-session").removeClass("d-none");
                                 // Overview page
+                                $("#header_text").removeClass("d-none");
+                                $("#welcome_text").removeClass("d-none");
                                 $("#my_name").val(response.full_name);
+                                $("#username_text").text(response.full_name);
                                 $("#my_learner_id").val(response.user_id);
                                 $("#disclaimer_text").text(response.disclaimer);
                                 $("#attempt_disclaimer").text("Attempt "+String(response.next_attempt));
@@ -233,6 +254,7 @@ function getUserInfo(afterReport=false)
                             }
                             else
                             {
+                                $("#header_text").removeClass("d-none");
                                 // Highlight mastery
                                 $('td[useFor="mastery"]').each(function(){
                                     this_cell_data = response.mastery_list[parseInt($(this).attr("cellId")) - 1]
@@ -699,9 +721,9 @@ function fetchReport(switch_page=false)
                             $("#tab-4").click();
                         });
 
-                        $('div[useFor="reportonly"]').on('click', function(){
+                        $('button[useFor="reportonly"]').on('click', function(){
                             $("#history_exp_card").removeClass("d-none");
-                            getExplanation($(this).text());
+                            getExplanation($(this).attr("title"));
                         })
                     }
                     else
@@ -904,7 +926,7 @@ function abortAttempt()
 
 function abortButton()
 {
-    var abort_btn_string = "<button class=\"btn btn-danger\" id=\"abort_btn\">Abort the attempt  X</button>"
+    var abort_btn_string = "<button class=\"btn btn-dangercustom\" id=\"abort_btn\">Abort the attempt  X</button>"
     $("#abort_point").html(abort_btn_string);
 
     /* Quiz - Abort button */
@@ -928,6 +950,9 @@ function fetchQuestion(fetch_time_out=false)
     });
 
     $("#non-session").addClass("d-none");
+    $("#header_text").removeClass("d-none");
+    $("#welcome_text").addClass("d-none");
+    $("#adt_text").removeClass("d-none");
     $("#attempt_point").removeClass("d-none");
     thisAjax(fetch_time_out);
     abortButton();
@@ -978,6 +1003,11 @@ function fetchQuestion(fetch_time_out=false)
                             $("#answer_text_2").text(response.ans_2);
                             $("#answer_text_3").text(response.ans_3);
                             $("#answer_text_4").text(response.ans_4);
+                            $('span[useFor="result_text"]').each(function() {
+                                $(this).text("");
+                                $(this).css("color", "");
+
+                            });
                             $("#show_exp_btn").addClass("disabled");
                             $("#explanation_card").addClass("fade");
                             $("#explanation_text").text("");
@@ -1046,6 +1076,27 @@ function submitAnswer(answer_choice)
                             $("#result_text").text("-");
                             $("#result_text").css("color", "grey");
                         }
+                        $('span[useFor="result_text"]').each(function(context) {
+
+                            if ((context + 1) == answer_choice )
+                            {
+                                if (response.learner_feedback == "pass")
+                                    {
+                                        $(this).text("Correct");
+                                        $(this).css("color", "green");
+                                    }
+                                    else if (response.learner_feedback == "fail")
+                                    {
+                                        $(this).text("Incorrect");
+                                        $(this).css("color", "red");
+                                    }
+                                    else if (response.learner_feedback == "idk")
+                                    {
+                                        $(this).text("-");
+                                        $(this).css("color", "grey");
+                                    }
+                            }
+                        });
 
                         $("#explanation_card").removeClass("fade");
                         $("#explanation_text").text(response.explanation);
@@ -1090,25 +1141,29 @@ function createAnswerHistory(array, append_place)
 
         if (i < array.length)
         {
-            if (array[i] == 1)
+            if (array[i] == 1) // Success
             {
-                append_string += "<div class=\"col bg-success border\" useFor=\"reportonly\" style=\"color:white\">"
-                append_string += String(i+1) + "</div>"
+                append_string += "<div class=\"col text-center\" style=\"color:white\">"
+                append_string += "<button class=\"btn btn-successcustom btn-circle\" useFor=\"reportonly\" title=\"" +String(i+1) + "\">&nbsp;&nbsp;<svg fill=\"currentColor\"><use xlink:href=\"#correctcheck\"/></svg></button>" + "</div>"
             }
-            else if (array[i] == -1)
+            else if (array[i] == -1) // IDK
             {
-                append_string += "<div class=\"col bg-secondary border\" useFor=\"reportonly\" style=\"color:white\">"
-                append_string += String(i+1) + "</div>"
+                append_string += "<div class=\"col text-center\" style=\"color:white\">"
+                // append_string += "<button class=\"btn btn-secondary btn-circle text-center\" useFor=\"reportonly\" title=\"" +String(i+1) + "\">" + String(i+1) + ">?</button>" + "</div>"
+                append_string += "<button class=\"btn btn-secondary btn-circle text-center\" useFor=\"reportonly\" title=\"" +String(i+1) + "\">" + "?</button>" + "</div>"
             }
-            else
+            else // Danger
             {
-                append_string += "<div class=\"col bg-danger border\" useFor=\"reportonly\" style=\"color:white\">"
-                append_string += String(i+1) + "</div>"
+                append_string += "<div class=\"col text-center\" style=\"color:white\">"
+                append_string += "<button class=\"btn btn-dangercustom btn-circle text-center\" useFor=\"reportonly\" title=\"" +String(i+1) + "\">X</button>" + "</div>"
             }
+
         }
         else
         {
-            append_string += "<div class=\"col\">&nbsp;</div>"
+            append_string += "<div class=\"col text-center\" useFor=\"reportonly\" style=\"color:white\">"
+            append_string += "<button class=\"btn btn-link btn-circle disabled\"></button></div>"
+            //append_string += "<div class=\"col\">&nbsp;</div>"
         }
 
         if (((i % 10) == 9)) // 10, 20, 30, 40, ...
@@ -1123,3 +1178,38 @@ function createAnswerHistory(array, append_place)
 
     $("#" + append_place).html(append_string);
 }
+//         if (i < array.length)
+//         {
+//             if (array[i] == 1) // Success
+//             {
+//                 append_string += "<div class=\"col bg-success border\" useFor=\"reportonly\" style=\"color:white\">"
+//                 append_string += String(i+1) + "</div>"
+//             }
+//             else if (array[i] == -1)
+//             {
+//                 append_string += "<div class=\"col bg-secondary border\" useFor=\"reportonly\" style=\"color:white\">"
+//                 append_string += String(i+1) + "</div>"
+//             }
+//             else
+//             {
+//                 append_string += "<div class=\"col bg-danger border\" useFor=\"reportonly\" style=\"color:white\">"
+//                 append_string += String(i+1) + "</div>"
+//             }
+//         }
+//         else
+//         {
+//             append_string += "<div class=\"col\">&nbsp;</div>"
+//         }
+
+//         if (((i % 10) == 9)) // 10, 20, 30, 40, ...
+//         {
+//             if (row_started == true)
+//             {
+//                 append_string += "</div>"
+//                 row_started = false;
+//             }
+//         }
+//     }
+
+//     $("#" + append_place).html(append_string);
+// }

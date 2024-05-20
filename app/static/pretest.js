@@ -31,6 +31,16 @@ $(document).ready(function()
         }
         
     });
+
+    /* Quiz - IDK button */
+    $("#idk_btn").click(function()
+    {
+        if (confirm("Are you sure? Click 'yes' if you do not want to guess?") == true)
+        {
+            submitAnswer(0);
+        }
+        
+    });
 });
 
 /* Overview and main functionality */
@@ -139,6 +149,11 @@ function fetchQuestion()
                             $("#answer_text_2").text(response.ans_2);
                             $("#answer_text_3").text(response.ans_3);
                             $("#answer_text_4").text(response.ans_4);
+                            $('span[useFor="result_text"]').each(function() {
+                                $(this).text("");
+                                $(this).css("color", "");
+
+                            });
 
                             $("#explanation_card").addClass("fade");
                             $("#explanation_text").text("");
@@ -146,7 +161,7 @@ function fetchQuestion()
                             $("#submit_btn").removeClass("disabled");
                             $('#next_question').off('click', fetchQuestion);
                             $('#next_question').addClass("disabled");
-                            createAnswerHistory(response.quiz_streak);
+                            createAnswerHistory(response.quiz_streak, "answer_history");
                             $("#progress_span").text(String(response.quiz_streak.length) + "/" + String(response.total_quiz))
                             
                         }
@@ -190,6 +205,27 @@ function submitAnswer(answer_choice)
                             $("#result_text").text("Incorrect");
                             $("#result_text").css("color", "red");
                         }
+                        $('span[useFor="result_text"]').each(function(context) {
+
+                            if ((context + 1) == answer_choice )
+                            {
+                                if (response.learner_feedback == "pass")
+                                    {
+                                        $(this).text("Correct");
+                                        $(this).css("color", "green");
+                                    }
+                                    else if (response.learner_feedback == "fail")
+                                    {
+                                        $(this).text("Incorrect");
+                                        $(this).css("color", "red");
+                                    }
+                                    else if (response.learner_feedback == "idk")
+                                    {
+                                        $(this).text("-");
+                                        $(this).css("color", "grey");
+                                    }
+                            }
+                        });
 
                         $("#explanation_card").removeClass("fade");
                         $("#explanation_text").text(response.explanation);
@@ -210,7 +246,7 @@ function submitAnswer(answer_choice)
     }
 }
 
-function createAnswerHistory(array)
+function createAnswerHistory(array, append_place)
 {
     row_max_length = 10;
     append_string = "";
@@ -233,32 +269,40 @@ function createAnswerHistory(array)
         }
 
         if (i < array.length)
-        {
-            if (array[i] == 1)
             {
-                append_string += "<div class=\"col bg-success border\" style=\"color:white\">"
-                append_string += String(i+1) + "</div>"
+                if (array[i] == 1) // Success
+                {
+                    append_string += "<div class=\"col text-center\" style=\"color:white\">"
+                    append_string += "<button class=\"btn btn-successcustom btn-circle\" useFor=\"reportonly\" title=\"" +String(i+1) + "\">&nbsp;&nbsp;<svg fill=\"currentColor\"><use xlink:href=\"#correctcheck\"/></svg></button>" + "</div>"
+                }
+                else if (array[i] == -1) // IDK
+                {
+                    append_string += "<div class=\"col text-center\" style=\"color:white\">"
+                    append_string += "<button class=\"btn btn-secondary btn-circle\" useFor=\"reportonly\" title=\"" +String(i+1) + "\">" + String(i+1) + "</button>" + "</div>"
+                }
+                else // Danger
+                {
+                    append_string += "<div class=\"col text-center\" style=\"color:white\">"
+                    append_string += "<button class=\"btn btn-dangercustom btn-circle text-center\" useFor=\"reportonly\" title=\"" +String(i+1) + "\">X</button>" + "</div>"
+                }
+    
             }
             else
             {
-                append_string += "<div class=\"col bg-danger border\" style=\"color:white\">"
-                append_string += String(i+1) + "</div>"
+                append_string += "<div class=\"col text-center\" useFor=\"reportonly\" style=\"color:white\">"
+                append_string += "<button class=\"btn btn-link btn-circle disabled\"></button></div>"
+                //append_string += "<div class=\"col\">&nbsp;</div>"
             }
-        }
-        else
-        {
-            append_string += "<div class=\"col\">&nbsp;</div>"
-        }
-
-        if (((i % 10) == 9)) // 10, 20, 30, 40, ...
-        {
-            if (row_started == true)
+    
+            if (((i % 10) == 9)) // 10, 20, 30, 40, ...
             {
-                append_string += "</div>"
-                row_started = false;
+                if (row_started == true)
+                {
+                    append_string += "</div>"
+                    row_started = false;
+                }
             }
         }
+    
+        $("#" + append_place).html(append_string);
     }
-
-    $("#answer_history").html(append_string);
-}

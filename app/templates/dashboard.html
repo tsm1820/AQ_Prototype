@@ -3,6 +3,7 @@
 <!-- CSS Script -->
 {% block css_script_1 %}
 <link href="{{url_for('static', filename='css/jquery.dataTables.min.css')}}" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 {% endblock %}
 {% block css_script_2 %}
 <link href="{{url_for('static', filename='dashboard.css')}}" rel="stylesheet">
@@ -27,7 +28,18 @@
 <div class="row" id="top-row">
     <div class="row">
         <div class="col text-start">
-            <h1><b>Adaptive Quiz</b></h1>
+            <div class="d-none" id="header_text">
+                <div class="d-none" id="welcome_text">
+                    <h1><b>Adaptive Quiz</b></h1>
+                    <h3><b>Project Monitoring and Control</b></h3>
+                    <h3>Welcome back, <i id="username_text"></i></h3>
+                    <h5>Here is an overview of your progress and performance</h5>
+                </div>
+                <div class="d-none" id="adt_text">
+                    <h3><b>Adaptive Quiz</b></h3>
+                    <h5>&nbsp;</h5>
+                </div>
+            </div>
         </div>
         <div class="col text-end">
             <span id="abort_point">
@@ -35,9 +47,11 @@
             </span>
             <button class="btn btn-dark"><svg fill="currentColor"><use xlink:href="#steps"/></svg>My learning path</button>
         </div>
-        <div class="col input-group mb-3">
-            <span class="input-group-text"><svg><use xlink:href="#search"/></svg></span>
+        <div class="col text-end">
+            <div class="input-group mb-3">
+                <span class="input-group-text"><svg><use xlink:href="#search"/></svg></span>
             <input type="text" class="form-control" placeholder="Search" readonly>
+            </div>
         </div>
     </div>
     <div class="row">
@@ -175,8 +189,8 @@
                             <span class="input-group-text">
                             <button class="btn btn-light btn-sm" id="view_switch_btn"><svg><use xlink:href="#arrow-repeat"/></svg><b id="view_switch_title">Performance History</b></button>
                         </span></h3>
-                        <canvas id="learner_ability_chart" width="70vw" height="13vh"></canvas>
-                        <canvas class="d-none" id="learner_score_chart" width="70vw" height="13vh"></canvas>
+                        <canvas id="learner_ability_chart" width="70vw" height="11vh"></canvas>
+                        <canvas class="d-none" id="learner_score_chart" width="70vw" height="11vh"></canvas>
                     </div>
                     <div id="ability_chart_status"></div>
                 </div>
@@ -277,8 +291,13 @@
             </div>
             <div class="divpad"></div>
             <div class="row"> <!-- question answered -->
-                <h3 class="text-start"><i id="attempt_report_ans"></i> Answer history (Click on answer history to see explanation)</h3>
-                <div class="col card">
+                <h3 class="text-start">
+                    <span class="input-group-text">
+                        <svg><use xlink:href="#clock-history"/></svg><b><i id="attempt_report_ans"></i> Answer history</b> &nbsp; (Click on answer history to see explanation)
+                    </span
+                ></h3>
+                <h3 class="text-start"></h3>
+                <div class="col">
                     <div class="container-fluid text-center" id="report_attempt_answer">
                     
                     </div>
@@ -501,8 +520,8 @@
                     <table class="table border table-hover" style="table-layout: fixed;">
                             <td style="width:3%"><input name="answer_choice" type="radio" id="check_1" checkbox-role="choice_selector"></td>
                             <td class="text-start">
-                                <div><b>Option A</b></div>
-                                <div class="text-start" style="word-wrap: break-word; white-space: normal !important;" id="answer_text_1">123</div>
+                                <div><b>Option A</b>&nbsp; &nbsp;<span class="fs-4" useFor="result_text"></span></div>
+                                <div class="text-start" style="word-wrap: break-word; white-space: normal !important;" id="answer_text_1"></div>
                             </td>
                     </table>
                 </label>
@@ -514,8 +533,8 @@
                     <table class="table border table-hover" style="table-layout: fixed;">
                             <td style="width:3%"><input name="answer_choice" type="radio" id="check_2" checkbox-role="choice_selector"></td>
                             <td class="text-start">
-                                <div><b>Option B</b></div>
-                                <div class="text-start" style="word-wrap: break-word; white-space: normal !important;" id="answer_text_2">123</div>
+                                <div><b>Option B</b>&nbsp; &nbsp;<span class="fs-4" useFor="result_text"></span></div>
+                                <div class="text-start" style="word-wrap: break-word; white-space: normal !important;" id="answer_text_2"></div>
                             </td>
                     </table>
                 </label>
@@ -527,8 +546,8 @@
                     <table class="table border table-hover" style="table-layout: fixed;">
                             <td style="width:3%"><input name="answer_choice" type="radio" id="check_3" checkbox-role="choice_selector"></td>
                             <td class="text-start">
-                                <div><b>Option C</b></div>
-                                <div class="text-start" style="word-wrap: break-word; white-space: normal !important;" id="answer_text_3">123</div>
+                                <div><b>Option C</b>&nbsp; &nbsp;<span class="fs-4" useFor="result_text"></span></div>
+                                <div class="text-start" style="word-wrap: break-word; white-space: normal !important;" id="answer_text_3"></div>
                             </td>
                     </table>
                 </label>
@@ -540,8 +559,8 @@
                     <table class="table border table-hover" style="table-layout: fixed;">
                             <td style="width:3%"><input name="answer_choice" type="radio" id="check_4" checkbox-role="choice_selector"></td>
                             <td class="text-start">
-                                <div><b>Option D</b></div>
-                                <div class="text-start" style="word-wrap: break-word; white-space: normal !important;" id="answer_text_4">123</div>
+                                <div><b>Option D</b>&nbsp; &nbsp;<span class="fs-4" useFor="result_text"></span></div>
+                                <div class="text-start" style="word-wrap: break-word; white-space: normal !important;" id="answer_text_4"></div>
                             </td>
                     </table>
                 </label>
@@ -552,19 +571,21 @@
                 </div>
                 <div class="col text-center">
                     <button class="btn btn-dark" id="idk_btn">I don't know</button>
-                    <button class="btn btn-success" id="submit_btn">Submit</button>
+                    <button class="btn btn-successcustom" id="submit_btn">Submit</button>
                 </div>
                 <div class="col text-end">
-                    <button class="btn btn-dark disabled" id="next_question">Next</button>
+                    <button class="btn btn-dark" id="next_question">Next <svg fill="currentColor"><use xlink:href="#arrow-right"/></svg></button>
                 </div>
             </div>
             <div class="fade" id="explanation_card">
                 <div class="row">
                     <div class="col text-start">
                         Result: <h3 id="result_text"></h3>
+                        <!-- &nbsp; -->
                     </div>
                     <div class="col text-end">
-                        <button class="btn btn-info disabled" id="show_exp_btn" type="button" data-bs-toggle="collapse" data-bs-target="#explanation_box" aria-expanded="false" aria-controls="explanation_box">Show explanation</button>
+                        <button class="btn btn-bluecustom" id="show_exp_btn" type="button" data-bs-toggle="collapse" data-bs-target="#explanation_box" aria-expanded="false" aria-controls="explanation_box">
+                            <i class="fas fa-eye"></i> Show explanation</button>
                     </div>
                 </div>
                 <div class="row" style="padding-top:1%">

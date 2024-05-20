@@ -24,7 +24,7 @@
 <div class="row" id="top-row">
     <div class="row">
         <div class="col text-start">
-            <h1><b>Pre-Test Session</b></h1>
+            <h3><b>Baseline Quiz Session</b></h3>
         </div>
         <div class="col text-end">
             <span id="abort_point">
@@ -86,8 +86,8 @@
                     <table class="table border table-hover" style="table-layout: fixed;">
                             <td style="width:3%"><input name="answer_choice" type="radio" id="check_1" checkbox-role="choice_selector"></td>
                             <td class="text-start">
-                                <div><b>Option A</b></div>
-                                <div class="text-start" style="word-wrap: break-word; white-space: normal !important;" id="answer_text_1">123</div>
+                                <div><b>Option A</b>&nbsp; &nbsp;<span class="fs-4" useFor="result_text"></span></div>
+                                <div class="text-start" style="word-wrap: break-word; white-space: normal !important;" id="answer_text_1"></div>
                             </td>
                     </table>
                 </label>
@@ -99,8 +99,8 @@
                     <table class="table border table-hover" style="table-layout: fixed;">
                             <td style="width:3%"><input name="answer_choice" type="radio" id="check_2" checkbox-role="choice_selector"></td>
                             <td class="text-start">
-                                <div><b>Option B</b></div>
-                                <div class="text-start" style="word-wrap: break-word; white-space: normal !important;" id="answer_text_2">123</div>
+                                <div><b>Option B</b>&nbsp; &nbsp;<span class="fs-4" useFor="result_text"></span></div>
+                                <div class="text-start" style="word-wrap: break-word; white-space: normal !important;" id="answer_text_2"></div>
                             </td>
                     </table>
                 </label>
@@ -112,8 +112,8 @@
                     <table class="table border table-hover" style="table-layout: fixed;">
                             <td style="width:3%"><input name="answer_choice" type="radio" id="check_3" checkbox-role="choice_selector"></td>
                             <td class="text-start">
-                                <div><b>Option C</b></div>
-                                <div class="text-start" style="word-wrap: break-word; white-space: normal !important;" id="answer_text_3">123</div>
+                                <div><b>Option C</b>&nbsp; &nbsp;<span class="fs-4" useFor="result_text"></span></div>
+                                <div class="text-start" style="word-wrap: break-word; white-space: normal !important;" id="answer_text_3"></div>
                             </td>
                     </table>
                 </label>
@@ -125,18 +125,29 @@
                     <table class="table border table-hover" style="table-layout: fixed;">
                             <td style="width:3%"><input name="answer_choice" type="radio" id="check_4" checkbox-role="choice_selector"></td>
                             <td class="text-start">
-                                <div><b>Option D</b></div>
-                                <div class="text-start" style="word-wrap: break-word; white-space: normal !important;" id="answer_text_4">123</div>
+                                <div><b>Option D</b>&nbsp; &nbsp;<span class="fs-4" useFor="result_text"></span></div>
+                                <div class="text-start" style="word-wrap: break-word; white-space: normal !important;" id="answer_text_4"></div>
                             </td>
                     </table>
                 </label>
             </div>
             <div class="row" style="padding:1.0%">
+                <div class="col">
+                    &nbsp;
+                </div>
+                <div class="col text-center">
+                    <button class="btn btn-dark" id="idk_btn">I don't know</button>
+                    <button class="btn btn-successcustom" id="submit_btn">Submit</button>
+                </div>
+                <div class="col text-end">
+                    <button class="btn btn-dark disabled" id="next_question">Next</button>
+                </div>
             </div>
             <div class="fade" id="explanation_card">
                 <div class="row">
                     <div class="col text-start">
                         Result: <h3 id="result_text"></h3>
+                        <!-- &nbsp; -->
                     </div>
                     <div class="col text-end">
                         <button class="btn btn-info disabled" id="show_exp_btn" type="button" data-bs-toggle="collapse" data-bs-target="#explanation_box" aria-expanded="false" aria-controls="explanation_box">Show explanation</button>
@@ -167,14 +178,14 @@
                 <div class="col text-center">
                     <br/>
                     <br/>
-                    <button class="btn btn-dark" id="submit_btn">Submit</button>
+                    
                 </div>
             </div>
             <div class="row">
                 <div class="col text-center">
                     <br/>
                     <br/>
-                    <button class="btn btn-info disabled" id="next_question">Next</button>
+                    
                 </div>
             </div>
         </div>

@@ -155,10 +155,9 @@ def fn_req_fetch_report(): # Function goes two ways, either staying on dashboard
             if login_status.get_login_status() == True:
                 # ability
                 session['n_attempt'] = model_dbquery.UserDataQuery.get_latest_attempt(session['user_id']) + 1
+                # For future using
+                textbox_data = model_dbquery.GeneralDataQuery.get_textboxdata()
                 if (session['n_attempt'] > 1):
-                    # For future using
-                    textbox_data = model_dbquery.GeneralDataQuery.get_textboxdata()
-
                     learner_ability, user_timestamp = model_dbquery.UserDataQuery.get_user_abilities(session['user_id'])
                     showing_ability = []
                     if (len(learner_ability) > 0):
@@ -199,6 +198,7 @@ def fn_req_fetch_report(): # Function goes two ways, either staying on dashboard
                         showing_ability = []
                         showing_timestamp = []
                         response_list = []
+                        choice_list = []
                 else:
                     total_second_used = 0
                     total_quiz = 0
@@ -207,6 +207,7 @@ def fn_req_fetch_report(): # Function goes two ways, either staying on dashboard
                     showing_ability = []
                     showing_timestamp = []
                     response_list = []
+                    choice_list = []
 
                 quiz_streak = []
                 for i in range(0, len(response_list)):
@@ -363,7 +364,13 @@ def fn_req_submit_pre_quiz():
             login_status = model_usercontrol.UserAuthentication(login_state=1, session_id=session['session_id'], user_id=session['user_id'])
             if login_status.get_login_status() == True:
                 if (len(session['quiz_response_list'][0]) <= len(session['quiz_response_list'][1])):
-                    user_correct_ans = model_mapping.GenQuizPool.get_learner_response(session['quiz_response_list'][2][session['selecting_index']],request.json['selected_choice'])
+                    
+                    if (request.json['selected_choice'] == 0):
+                        idk = True
+                        user_correct_ans = -1
+                    else:
+                        idk = False
+                        user_correct_ans = model_mapping.GenQuizPool.get_learner_response(session['quiz_response_list'][2][session['selecting_index']],request.json['selected_choice'])
                     session['quiz_response_list'][0].append(user_correct_ans)
                     explanation = model_mapping.GenQuizPool().get_explanation_data(session['quiz_response_list'][2][session['selecting_index']])
                     
@@ -374,12 +381,22 @@ def fn_req_submit_pre_quiz():
                     if (user_correct_ans == 1):
                         response['learner_feedback'] = "pass"
                     else:
-                        response['learner_feedback'] = "fail"
+                        if (idk == False):
+                            response['learner_feedback'] = "fail"
+                        else:
+                            response['learner_feedback'] = "idk"
                     session['selecting_index'] += 1
                     
                     if (session['selecting_index'] == len(session['quiz_response_list'][1])):
                         # Create pre-test table
-                        model_dbquery.UserDataQuery.submit_user_pretest(session['user_id'], session['quiz_response_list'][0], session['quiz_response_list'][1])
+                        # Normalize for prequiz IDK to be 0
+                        normalize = []
+                        for i in range(0, len(session['quiz_response_list'][0])):
+                            if session['quiz_response_list'][0][i] == -1:
+                                normalize.append(0)
+                            else:
+                                normalize.append(session['quiz_response_list'][0][i])
+                        model_dbquery.UserDataQuery.submit_user_pretest(session['user_id'], normalize, session['quiz_response_list'][1])
                         # Create mastery table
                         model_dbquery.UserDataQuery.create_mastery_slot(session['user_id'])
                         # Create train table
@@ -494,7 +511,7 @@ def fn_fetch_question():
                                     "quiz_streak":data['append_response_list'],
                                     "total_quiz":total_quiz}
                     
-                    print(data['session_complete'], data['timeout'])
+                    
                         
                     # Overriding the data for special condition
                     if (data['session_complete'] == True):
@@ -853,7 +870,8 @@ def sub_mapping_answer(in_sqe, input_response, quiz_engine_input, answer_choice)
     limit_time = qei['start_ts'] + (qei['duration'] * 60)
     current_time = int(time.time())
     if (qei['duration'] == 0): # No timer
-        current_time = limit_time - 1
+        limit_time = current_time + 1
+        #current_time = limit_time - 1
 
     if (current_time <= limit_time):
         if (sqe['remain_quiz_cell'] > 0):
